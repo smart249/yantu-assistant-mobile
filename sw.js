@@ -1,5 +1,5 @@
 /* 研途小助手 Service Worker —— 网络优先 + 离线回退 */
-var CACHE = 'yantu-v24';
+var CACHE = 'yantu-v25';
 var ASSETS = ['./','./index.html','./manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png'];
 
 self.addEventListener('install', function(e){

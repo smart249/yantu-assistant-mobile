@@ -56,6 +56,10 @@ svg{display:block;flex-shrink:0}
 .btn-danger:hover{border-color:var(--red);background:var(--red-bg)}
 .btn-sm{min-height:36px;padding:6px 12px;font-size:13px;border-radius:9px}
 .btn-icon{width:44px;height:44px;padding:0}
+.pwa-install-btn{display:none}
+.pwa-install-btn.show{display:inline-flex}
+.pwa-status{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.pwa-status .desc{flex:1;min-width:220px}
 
 /* ===== 卡片 ===== */
 .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;margin-bottom:16px}
@@ -344,6 +348,7 @@ body.has-bt .toast{bottom:calc(76px + env(safe-area-inset-bottom))}
         <span>研途小助手</span>
       </div>
       <div class="top-actions">
+        <button class="btn btn-primary pwa-install-btn" id="installAppBtn" onclick="requestPwaInstall()"><span id="icoInstall"></span><span class="hide-m">安装软件</span></button>
         <button class="btn" onclick="exportJSON()"><span id="icoDl"></span><span class="hide-m">导出备份</span></button>
         <button class="btn" onclick="document.getElementById('fileImport').click()"><span id="icoUl"></span><span class="hide-m">导入恢复</span></button>
         <input type="file" id="fileImport" accept=".json,application/json" style="display:none" onchange="handleImport(this)">
@@ -435,6 +440,15 @@ body.has-bt .toast{bottom:calc(76px + env(safe-area-inset-bottom))}
     <!-- 设置 -->
     <section class="panel" id="panel-settings">
       <div class="card">
+        <div class="card-title"><span class="dot"></span>安装为手机软件</div>
+        <div class="pwa-status">
+          <div class="desc" id="pwaInstallStatus">正在检查当前浏览器的安装能力……</div>
+          <button class="btn btn-primary" id="pwaInstallAction" onclick="requestPwaInstall()">安装到桌面</button>
+        </div>
+        <div class="hint" style="margin-top:10px">安装后会拥有独立图标和全屏窗口；数据仍只保存在当前设备中，请继续定期导出安全备份。</div>
+      </div>
+
+      <div class="card">
         <div class="card-title"><span class="dot"></span>嵌入你喜欢的 AI</div>
         <div class="setting-block">
           <h4>AI 助手配置</h4>
@@ -483,12 +497,12 @@ body.has-bt .toast{bottom:calc(76px + env(safe-area-inset-bottom))}
       <div class="card">
         <div class="card-title"><span class="dot"></span>关于</div>
         <div class="desc" style="font-size:13px;color:var(--sub);line-height:1.9">
-          · 单文件工作台，离线可用，无需安装<br>
+          · 单文件工作台，支持离线使用，也可安装到手机桌面<br>
           · AI 请求由你的浏览器直接发往所配置的服务商，数据不经过任何第三方服务器<br>
           · 部署到线上后页面公网可访问，请勿在页面中预填真实隐私数据<br>
           · 有任何问题随时回来找我迭代升级
         </div>
-        <div class="desc" style="font-size:12px;color:var(--mut);margin-top:10px">当前版本：<b id="appVer" style="color:var(--main)"></b> · 更新日期 2026-08-18</div>
+        <div class="desc" style="font-size:12px;color:var(--mut);margin-top:10px">当前版本：<b id="appVer" style="color:var(--main)"></b> · 更新日期 2026-09-01</div>
       </div>
     </section>
 
@@ -668,7 +682,7 @@ function mountIcons(){
   svgEl('icoPlus','plus',16);svgEl('icoPlus2','plus',16);svgEl('icoPlus3','plus',15);
   svgEl('icoEditAdd','edit',16);
   svgEl('icoImport','ul',15);svgEl('icoPlusC','plus',15);svgEl('icoClock2','clock',15);
-  svgEl('btIconLearn','book',20);svgEl('icoSound','sound',18);
+  svgEl('btIconLearn','book',20);svgEl('icoSound','sound',18);svgEl('icoInstall','dl',16);
 }
 
 /* ================= 面板切换 ================= */
@@ -2045,7 +2059,7 @@ function renderPapers(){
 
 /* ================= AI 助手 ================= */
 function fillSettings(){
-  var el=$('#appVer');if(el)el.textContent='v17';
+  var el=$('#appVer');if(el)el.textContent='v18';
   $('#aiBase').value=aiCfg.baseUrl||'';
   $('#aiKey').value=aiCfg.apiKey||'';
   $('#aiModel').value=aiCfg.model||'';
@@ -2441,6 +2455,64 @@ function doClear(kind){
   if(kind==='all')idbClear().catch(function(){});
 }
 
+/* ================= 安装为 PWA 软件 ================= */
+var pwaInstallEvent=null;
+function getPwaInstallState(options){
+  if(options&&options.standalone)return 'installed';
+  if(options&&options.canPrompt)return 'prompt';
+  if(options&&options.isIOS)return 'ios';
+  return 'browser';
+}
+function isPwaStandalone(){
+  return !!((window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches)||navigator.standalone===true);
+}
+function isPwaIOS(){
+  var ua=navigator.userAgent||'';
+  return /iphone|ipad|ipod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+}
+function currentPwaInstallState(){
+  return getPwaInstallState({standalone:isPwaStandalone(),canPrompt:!!pwaInstallEvent,isIOS:isPwaIOS()});
+}
+function updatePwaInstallUI(){
+  var state=currentPwaInstallState(),top=$('#installAppBtn'),status=$('#pwaInstallStatus'),action=$('#pwaInstallAction');
+  if(top)top.classList.toggle('show',state!=='installed');
+  if(!status||!action)return;
+  action.disabled=state==='installed';
+  action.textContent=state==='installed'?'已安装':(state==='prompt'?'安装到桌面':'查看安装方法');
+  if(state==='installed')status.textContent='当前已作为独立软件运行，可以直接从手机桌面打开。';
+  else if(state==='prompt')status.textContent='当前浏览器支持直接安装，点击按钮后确认即可添加到手机桌面。';
+  else if(state==='ios')status.textContent='iPhone / iPad 请使用 Safari 的“分享”菜单，再选择“添加到主屏幕”。';
+  else status.textContent='如果浏览器没有弹出安装提示，请打开浏览器菜单，选择“安装应用”或“添加到主屏幕”。';
+}
+function showPwaInstallGuide(state){
+  var ios=state==='ios';
+  openModal('<div class="modal-box"><div class="md-title">安装研途小助手<button class="x" onclick="closeModal()">'+ico('x',16)+'</button></div>'+
+    '<div class="desc" style="line-height:2">'+(ios?
+      '1. 请确认正在使用 Safari 打开本站<br>2. 点击底部“分享”按钮<br>3. 向下找到“添加到主屏幕”<br>4. 点击右上角“添加”':
+      '1. 使用 Chrome、Edge 或系统浏览器打开本站<br>2. 点击浏览器右上角菜单<br>3. 选择“安装应用”或“添加到主屏幕”<br>4. 按提示确认安装')+'</div>'+
+    '<div class="actions"><button class="btn btn-primary" onclick="closeModal()">知道了</button></div></div>');
+}
+async function requestPwaInstall(){
+  var state=currentPwaInstallState();
+  if(state==='installed'){toast('研途小助手已经安装');return}
+  if(state!=='prompt'){showPwaInstallGuide(state);return}
+  var event=pwaInstallEvent;
+  pwaInstallEvent=null;
+  await event.prompt();
+  var choice=await event.userChoice;
+  updatePwaInstallUI();
+  toast(choice&&choice.outcome==='accepted'?'安装请求已确认':'已取消安装');
+}
+function initPwaInstall(){
+  window.addEventListener('beforeinstallprompt',function(event){
+    event.preventDefault();pwaInstallEvent=event;updatePwaInstallUI();
+  });
+  window.addEventListener('appinstalled',function(){
+    pwaInstallEvent=null;updatePwaInstallUI();toast('研途小助手已安装到桌面');
+  });
+  updatePwaInstallUI();
+}
+
 /* ================= 弹窗 ================= */
 function openModal(html){
   $('#modal').innerHTML=html;$('#modal').classList.add('show');
@@ -2455,6 +2527,7 @@ loadAll();
 if(document.body.clientWidth<900)document.body.classList.add('has-bt');
 renderAll();
 switchPanel('course');
+initPwaInstall();
 </script>
 <script>
 if("serviceWorker" in navigator&&location.protocol.indexOf("http")===0){
