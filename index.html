@@ -349,7 +349,7 @@ body.has-bt .toast{bottom:calc(76px + env(safe-area-inset-bottom))}
       </div>
       <div class="top-actions">
         <button class="btn btn-primary pwa-install-btn" id="installAppBtn" onclick="requestPwaInstall()"><span id="icoInstall"></span><span class="hide-m">安装软件</span></button>
-        <button class="btn" onclick="exportJSON()"><span id="icoDl"></span><span class="hide-m">导出备份</span></button>
+        <button class="btn" onclick="exportJSON()"><span id="icoDl"></span><span class="hide-m">完整资料备份</span></button>
         <button class="btn" onclick="document.getElementById('fileImport').click()"><span id="icoUl"></span><span class="hide-m">导入恢复</span></button>
         <input type="file" id="fileImport" accept=".json,application/json" style="display:none" onchange="handleImport(this)">
       </div>
@@ -357,7 +357,7 @@ body.has-bt .toast{bottom:calc(76px + env(safe-area-inset-bottom))}
 
     <!-- 备份提醒条 -->
     <div class="tip-bar" id="tipBar" style="display:none">
-      <span>数据已积累较多，建议导出 JSON 备份，防止误删丢失。</span>
+      <span>数据已积累较多，建议导出完整资料备份，防止记录和文献原文件丢失。</span>
       <button class="btn btn-sm" onclick="exportJSON()" style="min-height:34px">去备份</button>
       <button class="btn btn-sm" onclick="closeTip()" style="min-height:34px">知道了</button>
     </div>
@@ -449,6 +449,18 @@ body.has-bt .toast{bottom:calc(76px + env(safe-area-inset-bottom))}
       </div>
 
       <div class="card">
+        <div class="card-title"><span class="dot"></span>任务与课程提醒</div>
+        <div class="setting-block" style="margin-bottom:0">
+          <div class="desc" id="reminderStatus">开启后，小助手会在应用打开或切回前台时提醒当天任务和课程，每项每天只提醒一次。</div>
+          <div class="actions" style="justify-content:flex-start">
+            <button class="btn btn-primary" id="reminderAction" onclick="toggleReminders()">开启提醒</button>
+            <button class="btn" onclick="checkReminders(true)">立即检查</button>
+          </div>
+          <div class="hint">受手机系统限制，纯静态 PWA 被彻底关闭后无法保证定时唤醒；需要持续后台提醒时，请把导出的课程日历导入系统日历。</div>
+        </div>
+      </div>
+
+      <div class="card">
         <div class="card-title"><span class="dot"></span>嵌入你喜欢的 AI</div>
         <div class="setting-block">
           <h4>AI 助手配置</h4>
@@ -468,10 +480,10 @@ body.has-bt .toast{bottom:calc(76px + env(safe-area-inset-bottom))}
         <div class="card-title"><span class="dot"></span>数据管理</div>
         <div class="setting-block">
           <h4>备份与恢复</h4>
-          <div class="desc">数据全部存储在本机浏览器中。建议每周导出一次 JSON 备份；换设备或清理缓存后，用「导入恢复」一键还原。</div>
+          <div class="desc">数据全部存储在本机浏览器中。建议每周导出一次完整资料备份；备份会包含文献原文件，但默认不包含 AI API Key。</div>
           <div class="actions" style="justify-content:flex-start">
-            <button class="btn" onclick="exportJSON()"><span id="icoDl3"></span>导出安全备份</button>
-            <button class="btn" onclick="exportJSON(true)">完整备份（含密钥）</button>
+            <button class="btn" onclick="exportJSON()"><span id="icoDl3"></span>完整资料备份（安全）</button>
+            <button class="btn" onclick="exportJSON(true)">完整资料备份（含密钥）</button>
             <button class="btn" onclick="document.getElementById('fileImport').click()"><span id="icoUl3"></span>导入恢复</button>
           </div>
         </div>
@@ -502,7 +514,7 @@ body.has-bt .toast{bottom:calc(76px + env(safe-area-inset-bottom))}
           · 部署到线上后页面公网可访问，请勿在页面中预填真实隐私数据<br>
           · 有任何问题随时回来找我迭代升级
         </div>
-        <div class="desc" style="font-size:12px;color:var(--mut);margin-top:10px">当前版本：<b id="appVer" style="color:var(--main)"></b> · 更新日期 2026-09-01</div>
+        <div class="desc" style="font-size:12px;color:var(--mut);margin-top:10px">当前版本：<b id="appVer" style="color:var(--main)"></b> · 更新日期 2026-09-02</div>
       </div>
     </section>
 
@@ -2059,7 +2071,7 @@ function renderPapers(){
 
 /* ================= AI 助手 ================= */
 function fillSettings(){
-  var el=$('#appVer');if(el)el.textContent='v18';
+  var el=$('#appVer');if(el)el.textContent='v19';
   $('#aiBase').value=aiCfg.baseUrl||'';
   $('#aiKey').value=aiCfg.apiKey||'';
   $('#aiModel').value=aiCfg.model||'';
@@ -2402,10 +2414,44 @@ function exportCSV(){
 }
 
 /* ================= 备份 / 导入 / 清空 ================= */
+function bytesToBase64(bytes){
+  var binary='',chunk=32768;
+  for(var i=0;i<bytes.length;i+=chunk)binary+=String.fromCharCode.apply(null,bytes.subarray(i,Math.min(i+chunk,bytes.length)));
+  return btoa(binary);
+}
+function blobToDataUrl(blob){
+  return blob.arrayBuffer().then(function(buf){return 'data:'+(blob.type||'application/octet-stream')+';base64,'+bytesToBase64(new Uint8Array(buf))});
+}
+function dataUrlToBlob(value){
+  var m=String(value||'').match(/^data:([^;,]*)(?:;[^,]*)?;base64,([A-Za-z0-9+/=\s]+)$/);
+  if(!m)throw new Error('bad file data');
+  var raw=atob(m[2].replace(/\s/g,'')),bytes=new Uint8Array(raw.length);
+  for(var i=0;i<raw.length;i++)bytes[i]=raw.charCodeAt(i);
+  return new Blob([bytes],{type:m[1]||'application/octet-stream'});
+}
+function collectBackupFiles(items,getFile){
+  var jobs=(items||[]).filter(function(p){return p&&p.id&&p.fileName}).map(function(p){
+    return Promise.resolve().then(function(){return getFile(p.id)}).then(function(blob){
+      if(!blob)return null;
+      return blobToDataUrl(blob).then(function(dataUrl){return {paperId:p.id,name:p.fileName,type:blob.type||'application/octet-stream',size:blob.size||0,dataUrl:dataUrl}});
+    }).catch(function(){return null});
+  });
+  return Promise.all(jobs).then(function(files){return files.filter(Boolean)});
+}
+function restoreBackupFiles(files,putFile){
+  var restored=0,failed=0;
+  var jobs=(Array.isArray(files)?files:[]).map(function(file){
+    return Promise.resolve().then(function(){
+      if(!file||!file.paperId||!file.dataUrl)throw new Error('bad file entry');
+      return putFile(file.paperId,dataUrlToBlob(file.dataUrl));
+    }).then(function(){restored++},function(){failed++});
+  });
+  return Promise.all(jobs).then(function(){return {restored:restored,failed:failed}});
+}
 function buildBackupData(includeSecrets){
   var cfg={baseUrl:aiCfg.baseUrl||'',model:aiCfg.model||''};
   if(includeSecrets)cfg.apiKey=aiCfg.apiKey||'';
-  return {app:'研途小助手',version:3,exportAt:new Date().toISOString(),papers:papers,tasks:tasks,money:money,course:course,meta:meta,aiCfg:cfg};
+  return {app:'研途小助手',version:4,exportAt:new Date().toISOString(),papers:papers,tasks:tasks,money:money,course:course,meta:meta,aiCfg:cfg,files:[]};
 }
 function mergeImportedAiCfg(incoming,current){
   var next={baseUrl:(current&&current.baseUrl)||'',apiKey:(current&&current.apiKey)||'',model:(current&&current.model)||''};
@@ -2415,16 +2461,19 @@ function mergeImportedAiCfg(incoming,current){
   if(Object.prototype.hasOwnProperty.call(incoming,'apiKey'))next.apiKey=incoming.apiKey||'';
   return next;
 }
-function exportJSON(includeSecrets){
+async function exportJSON(includeSecrets){
   if(includeSecrets&&!window.confirm('完整备份会包含 API Key。请只保存到可信设备，确定继续吗？'))return;
+  toast('正在整理数据和文献原文件…');
   var data=buildBackupData(!!includeSecrets);
+  data.files=await collectBackupFiles(papers,idbGet);
   download('研途小助手备份_'+todayStr()+'.json',JSON.stringify(data,null,2),'application/json');
-  toast(includeSecrets?'完整备份已导出，请妥善保管':'安全备份已导出（不含 API Key）');
+  var named=papers.filter(function(p){return p&&p.fileName}).length,missing=Math.max(0,named-data.files.length);
+  toast((includeSecrets?'含密钥备份':'安全备份')+'已导出：'+data.files.length+' 个原文件'+(missing?'，'+missing+' 个原文件缺失':''));
 }
 function handleImport(inp){
   var f=inp.files&&inp.files[0];if(!f)return;
   var r=new FileReader();
-  r.onload=function(){
+  r.onload=async function(){
     try{
       var d=JSON.parse(r.result);
       if(!d||typeof d!=='object')throw new Error('bad');
@@ -2434,7 +2483,8 @@ function handleImport(inp){
       if(Array.isArray(d.course))course=d.course;
       if(d.meta&&typeof d.meta==='object'){meta=d.meta;store(KEY.meta,meta)}
       if(d.aiCfg&&typeof d.aiCfg==='object'){aiCfg=mergeImportedAiCfg(d.aiCfg,aiCfg);store(KEY.ai,aiCfg)}
-      saveAll();renderAll();toast('导入成功：'+papers.length+' 篇文献、'+tasks.length+' 个任务、'+money.length+' 条记账、'+course.length+' 门课程');
+      var fileResult=await restoreBackupFiles(d.files,idbPut);
+      saveAll();renderAll();toast('导入成功：'+papers.length+' 篇文献、'+tasks.length+' 个任务、'+course.length+' 门课程'+(fileResult.restored?'，恢复 '+fileResult.restored+' 个原文件':'')+(fileResult.failed?'，'+fileResult.failed+' 个原文件失败':''));
     }catch(e){toast('导入失败：文件格式不正确')}
   };
   r.readAsText(f);
@@ -2513,6 +2563,68 @@ function initPwaInstall(){
   updatePwaInstallUI();
 }
 
+/* ================= 应用运行时提醒 ================= */
+function buildDueReminders(options){
+  options=options||{};
+  var date=options.date||'',day=Number(options.day)||0,week=Number(options.week)||0,sent=options.sent||{},out=[];
+  (options.tasks||[]).forEach(function(task){
+    var key='task:'+task.id+':'+date;
+    if(task&&!task.done&&task.date===date&&!sent[key])out.push({key:key,title:'今日任务',body:task.name||'有一项待办任务'});
+  });
+  if(week>0)(options.course||[]).forEach(function(item){
+    var key='course:'+item.id+':'+date;
+    if(item&&Number(item.day)===day&&weekInRange(item.weeks,week)&&!sent[key]){
+      var section=item.start?(' · 第 '+item.start+'-'+(item.end||item.start)+' 节'):'';
+      var place=item.location?(' · '+item.location):'';
+      out.push({key:key,title:'今日课程',body:(item.name||'课程')+section+place});
+    }
+  });
+  return out;
+}
+function requestReminderPermission(){
+  if(!('Notification' in window)){toast('当前浏览器不支持系统通知');return Promise.resolve(false)}
+  return Notification.requestPermission().then(function(permission){
+    if(permission!=='granted'){toast('通知权限未开启，可在浏览器网站设置中重新允许');return false}
+    meta.reminders=meta.reminders||{};meta.reminders.enabled=true;meta.reminders.sent=meta.reminders.sent||{};store(KEY.meta,meta);
+    updateReminderUI();checkReminders(true);return true;
+  });
+}
+function toggleReminders(){
+  var enabled=!!(meta.reminders&&meta.reminders.enabled);
+  if(!enabled){requestReminderPermission();return}
+  meta.reminders.enabled=false;store(KEY.meta,meta);updateReminderUI();toast('应用提醒已关闭');
+}
+function updateReminderUI(){
+  var enabled=!!(meta.reminders&&meta.reminders.enabled),status=$('#reminderStatus'),action=$('#reminderAction');
+  if(status)status.textContent=enabled?'提醒已开启：应用启动或回到前台时会检查当天任务和课程。':'提醒未开启：开启后，每项当天任务和课程只提醒一次。';
+  if(action)action.textContent=enabled?'关闭提醒':'开启提醒';
+}
+function showLocalNotification(item){
+  if(navigator.serviceWorker&&navigator.serviceWorker.ready){
+    return navigator.serviceWorker.ready.then(function(reg){return reg.showNotification(item.title,{body:item.body,icon:'./icons/icon-192.png',tag:item.key})});
+  }
+  try{new Notification(item.title,{body:item.body,tag:item.key});return Promise.resolve()}catch(e){return Promise.reject(e)}
+}
+function checkReminders(manual){
+  var cfg=meta.reminders||{};
+  if(!cfg.enabled){if(manual)toast('请先开启提醒');return Promise.resolve([])}
+  if(!('Notification' in window)||Notification.permission!=='granted'){if(manual)toast('通知权限不可用，请重新开启');return Promise.resolve([])}
+  var now=new Date(),date=fmtD(now),sent=cfg.sent||{};
+  Object.keys(sent).forEach(function(key){if(key.slice(-10)!==date)delete sent[key]});
+  var items=buildDueReminders({date:date,day:now.getDay()||7,week:currentWeek(),sent:sent,tasks:tasks,course:course});
+  items.forEach(function(item){sent[item.key]=true});cfg.sent=sent;meta.reminders=cfg;store(KEY.meta,meta);
+  return Promise.all(items.map(function(item){return showLocalNotification(item).catch(function(){return null})})).then(function(){
+    if(manual)toast(items.length?'已发送 '+items.length+' 条今日提醒':'今天没有新的提醒');
+    return items;
+  });
+}
+function initReminders(){
+  updateReminderUI();
+  document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')checkReminders(false)});
+  setInterval(function(){checkReminders(false)},15*60*1000);
+  setTimeout(function(){checkReminders(false)},1200);
+}
+
 /* ================= 弹窗 ================= */
 function openModal(html){
   $('#modal').innerHTML=html;$('#modal').classList.add('show');
@@ -2528,6 +2640,7 @@ if(document.body.clientWidth<900)document.body.classList.add('has-bt');
 renderAll();
 switchPanel('course');
 initPwaInstall();
+initReminders();
 </script>
 <script>
 if("serviceWorker" in navigator&&location.protocol.indexOf("http")===0){

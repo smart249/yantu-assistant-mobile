@@ -2,6 +2,7 @@
   "name": "研途小助手 · 读研工作台",
   "short_name": "研途小助手",
   "description": "文献整理 · 课程表 · 本周计划 · 记账，你的读研数字助手",
+  "id": "./",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
