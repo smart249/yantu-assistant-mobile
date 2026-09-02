@@ -320,6 +320,179 @@ body.has-bt .toast{bottom:calc(76px + env(safe-area-inset-bottom))}
   .money-stats{grid-template-columns:1fr}
   .btn{padding:9px 12px}
 }
+
+/* ===== v20 · 研究蓝图工作台 ===== */
+:root{
+  --blueprint:#2557D6;--blueprint-dark:#173C9E;--blueprint-soft:#EAF0FF;
+  --ink:#172033;--ink-soft:#536078;--paper:#F4F7FB;--sheet:#FFFFFF;
+  --rule:#DCE3EE;--marker:#F4C95D;--marker-soft:#FFF7D6;
+  --danger:#D94B4B;--success:#16856B;
+  --display-font:"Songti SC","STSong","SimSun",serif;
+  --body-font:"PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  --data-font:"SFMono-Regular","Cascadia Code","Consolas",monospace;
+  --main:var(--blueprint);--main-d:var(--blueprint-dark);--main-bg:var(--blueprint-soft);
+  --bg:var(--paper);--card:var(--sheet);--line:var(--rule);
+  --text:var(--ink);--sub:var(--ink-soft);--mut:#8792A6;
+  --green:var(--success);--green-bg:#E8F5F1;
+  --red:var(--danger);--red-bg:#FCEBEC;
+  --orange:#A86D00;--orange-bg:var(--marker-soft);
+  --radius:10px;
+  --shadow:0 1px 2px rgba(23,32,51,.04),0 10px 30px rgba(52,73,112,.06);
+}
+html{background:var(--paper);scroll-behavior:smooth}
+body{
+  font-family:var(--body-font);color:var(--ink);background-color:var(--paper);
+  background-image:linear-gradient(rgba(37,87,214,.028) 1px,transparent 1px),linear-gradient(90deg,rgba(37,87,214,.028) 1px,transparent 1px);
+  background-size:24px 24px;
+}
+button,input,select,textarea{font-family:var(--body-font)}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,[tabindex]:focus-visible{
+  outline:2px solid var(--marker);outline-offset:3px;
+}
+
+/* 论文索引脊 */
+.sidebar{
+  width:232px;padding:24px 16px 20px;background:#F9FBFE;border-right:1px solid var(--rule);
+  box-shadow:8px 0 32px rgba(30,51,90,.035);
+}
+.sb-brand{position:relative;gap:12px;padding:0 8px 26px;color:var(--ink);font-family:var(--display-font);font-size:19px;letter-spacing:.06em}
+.sb-brand:after{content:"GRADUATE STUDY DESK";position:absolute;left:58px;bottom:12px;font:9px/1 var(--data-font);letter-spacing:.12em;color:var(--mut)}
+.sb-brand .logo,.brand .logo{border-radius:6px;background:var(--blueprint);box-shadow:6px 6px 0 #DDE6FC;color:#fff}
+.nav-item{position:relative;gap:12px;min-height:48px;margin:2px 0;padding:11px 10px 11px 42px;border-radius:7px;color:var(--ink-soft);font-size:14px}
+.nav-item:before{content:attr(data-index);position:absolute;left:10px;font:10px/1 var(--data-font);letter-spacing:.08em;color:#9AA6B8}
+.nav-item:after{content:"";position:absolute;left:-16px;top:9px;bottom:9px;width:3px;background:transparent}
+.nav-item:hover{background:#EEF3FA;color:var(--ink)}
+.nav-item.active{background:#EAF0FF;color:var(--blueprint);font-weight:700}
+.nav-item.active:before{color:var(--blueprint)}
+.nav-item.active:after{background:var(--blueprint)}
+.sb-foot{padding:16px 8px 0;border-top:1px solid var(--rule);font:10px/1.8 var(--data-font);letter-spacing:.02em}
+.main{margin-left:232px;max-width:1240px;min-width:0;padding:26px 34px 72px}
+
+/* 工作台顶栏 */
+.topbar{min-height:44px;margin-bottom:18px;border-bottom:1px solid var(--rule);padding-bottom:14px}
+.topbar:before{content:"RESEARCH WORKSPACE  /  研途记录";font:10px/1 var(--data-font);letter-spacing:.16em;color:var(--mut)}
+.top-actions{margin-left:auto;gap:7px}
+.btn{min-height:42px;padding:8px 15px;border-radius:7px;border-color:#D5DEEB;background:rgba(255,255,255,.92);font-size:13px;font-weight:600;box-shadow:0 1px 1px rgba(23,32,51,.03);transition:border-color .18s ease,background .18s ease,color .18s ease,transform .18s ease}
+.btn:hover{border-color:var(--blueprint);background:#F8FAFF;color:var(--blueprint)}
+.btn-primary{background:var(--blueprint);border-color:var(--blueprint);box-shadow:0 6px 16px rgba(37,87,214,.16);color:#fff}
+.btn-primary:hover{background:var(--blueprint-dark);color:#fff}
+.btn-danger{color:var(--danger);border-color:#F0C9CC}
+.btn-sm{min-height:34px;border-radius:6px}
+
+/* 纸张组件 */
+.card,.paper-card,.task-item,.mstat,.ln-card{
+  border:1px solid var(--rule);border-radius:10px;background:rgba(255,255,255,.96);box-shadow:var(--shadow);
+}
+.card{padding:20px;margin-bottom:14px}
+.card-title{font-family:var(--display-font);font-size:17px;letter-spacing:.035em}
+.card-title .dot{width:16px;height:3px;border-radius:0;background:var(--blueprint);box-shadow:7px 0 0 var(--marker)}
+.chip,.ov-tag,.week-badge{border-radius:4px;font-family:var(--data-font);letter-spacing:.01em}
+.paper-card{padding:17px 18px}
+.pc-title,.task-name,.row-cat{color:var(--ink)}
+.pc-meta,.task-date,.row-date,.mstat .ml,.cg-time,.cb-time,.cb-week,.ls-item{font-family:var(--data-font)}
+.pc-summary{border:1px solid #E7ECF3;border-radius:6px;background:#F8FAFD}
+.pc-points{border-color:#CCD9FA;border-radius:6px;background:#F1F5FF}
+.dropzone{border:1px dashed #9FB3E8;border-radius:8px;background-color:#F5F8FF;background-image:linear-gradient(135deg,rgba(37,87,214,.035) 25%,transparent 25%,transparent 50%,rgba(37,87,214,.035) 50%,rgba(37,87,214,.035) 75%,transparent 75%,transparent);background-size:12px 12px}
+.dropzone:hover{background-color:#EDF3FF}
+
+/* 学期进度尺：全站视觉签名 */
+.today-card{position:relative;overflow:hidden;padding:0;margin-bottom:16px;border:1px solid #263755;border-radius:10px;background-color:#172033;background-image:linear-gradient(rgba(255,255,255,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.045) 1px,transparent 1px);background-size:22px 22px;box-shadow:0 14px 34px rgba(23,32,51,.16);color:#fff}
+.semester-ruler{display:grid;grid-template-columns:auto minmax(90px,1fr) auto;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid rgba(255,255,255,.13);background:rgba(9,15,29,.36)}
+.sr-label,.sr-date{font:10px/1 var(--data-font);letter-spacing:.13em;color:#D7E0F0}
+.sr-track{height:4px;overflow:hidden;background:rgba(255,255,255,.15)}
+.sr-track i{display:block;height:100%;background:var(--marker);box-shadow:0 0 12px rgba(244,201,93,.6)}
+.today-head{padding:15px 17px 0;margin-bottom:10px;font-family:var(--display-font);font-size:18px;letter-spacing:.04em}
+.today-list{gap:7px;padding:0 12px 13px}
+.today-item{border:1px solid rgba(255,255,255,.1);border-radius:7px;background:rgba(255,255,255,.075);padding:10px 12px}
+.today-item:hover{background:rgba(255,255,255,.11)}
+.today-item .tt{font-size:14px}
+.today-item .td{font-family:var(--data-font);font-size:10.5px;color:#C8D2E4;opacity:1}
+.today-item .btn{border:1px solid rgba(255,255,255,.24)!important;background:rgba(255,255,255,.1)!important;color:#fff!important;box-shadow:none}
+.today-item.overdue{border-left:3px solid var(--marker);background:rgba(217,75,75,.13)}
+.today-item.overdue .tt{color:#FFE7E8}
+.today-empty{padding:0 18px 18px;color:#D2DBEA}
+
+/* 数据与工作模块 */
+.tip-bar{border-radius:7px;border-color:#EAD487;background:#FFF9DF;color:#735000}
+.panel.active{animation:desk-in .2s ease-out both}
+@keyframes desk-in{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.plan-head{margin-bottom:0}
+.task-item{padding:11px 13px;box-shadow:0 2px 12px rgba(48,68,104,.045)}
+.task-check{border-color:#AEBBD0;border-radius:6px}
+.task-item.done .task-check{background:var(--success);border-color:var(--success)}
+.pri{font-family:var(--data-font);border-radius:3px;letter-spacing:.04em}
+.mini-btn{border-radius:6px;background:#fff}
+.mstat{position:relative;overflow:hidden;padding:15px 16px}
+.mstat:before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--blueprint)}
+.mstat .mv,.row-amt{font-family:var(--data-font);font-variant-numeric:tabular-nums}
+.setting-block{border-radius:7px;background:#FBFCFE}
+
+/* 课表如研究排程图 */
+.course-scroll{border:1px solid var(--rule);border-radius:8px;background:#fff;box-shadow:inset -14px 0 18px -20px rgba(23,32,51,.6)}
+.course-grid{box-shadow:none}
+.cg-head{background:#EEF2F7}
+.cg-head>div{height:36px;border-color:#D2DBE8;background:#EEF2F7;font-family:var(--data-font);font-size:10.5px;letter-spacing:.03em}
+.cg-times{background:#F8FAFC}
+.cg-time{right:7px;color:#768399}
+.cg-col.today-col{background-color:#F3F6FF;background-image:linear-gradient(90deg,transparent calc(50% - .5px),rgba(37,87,214,.08) 50%,transparent calc(50% + .5px))}
+.course-block{left:4px;right:4px;border-radius:5px;padding:6px 7px;box-shadow:0 3px 9px rgba(23,32,51,.13);transition:transform .16s ease,filter .16s ease}
+.course-block:hover{transform:translateY(-1px);filter:saturate(1.08)}
+.course-block .cb-name{font-size:12px}
+.week-badge{padding:6px 11px;background:var(--ink);color:#fff}
+.sem-start{font-family:var(--data-font);font-size:11px}
+
+/* 学习、弹窗与反馈 */
+.ln-card{border-color:#CED9EE;background-color:#fff;background-image:linear-gradient(rgba(37,87,214,.026) 1px,transparent 1px);background-size:100% 24px}
+.ln-word{font-family:var(--display-font);font-size:30px;font-weight:700;letter-spacing:.03em}
+.ln-roman,.ln-tag,.ln-combo,.ln-badge{font-family:var(--data-font)}
+.ln-quiz-opt,.ln-word-row,.ln-group-head{border-radius:6px}
+.modal{background:rgba(13,22,38,.62);backdrop-filter:blur(3px)}
+.modal-box{border:1px solid #D4DEEB;border-radius:10px;box-shadow:0 28px 70px rgba(12,22,40,.27)}
+.md-title{padding-bottom:11px;border-bottom:1px solid var(--rule);font-family:var(--display-font);font-size:18px}
+.reader-head,.reader-foot{background:#F9FBFE}
+.reader-body{font-family:var(--display-font);font-size:17px}
+.toast{border:1px solid rgba(255,255,255,.12);border-radius:7px;background:#172033;font-size:13px;box-shadow:0 14px 32px rgba(23,32,51,.24)}
+
+/* 手机悬浮工作栏 */
+.bottombar{left:10px;right:10px;bottom:10px;border:1px solid #D5DEEB;border-radius:14px;background:rgba(255,255,255,.94);box-shadow:0 12px 32px rgba(23,32,51,.17);padding:4px 3px max(4px,env(safe-area-inset-bottom));backdrop-filter:blur(16px)}
+.bt-item{position:relative;min-height:54px;border-radius:10px;font-size:10px;font-weight:600}
+.bt-item.active{background:var(--blueprint-soft);color:var(--blueprint)}
+.bt-item.active:after{content:"";position:absolute;top:4px;width:14px;height:2px;background:var(--blueprint)}
+
+@media(max-width:899px){
+  body{background-size:20px 20px}
+  .main{margin-left:0;max-width:none;padding:14px 13px 102px}
+  .topbar{position:relative;min-height:52px;padding:0 0 11px;margin-bottom:13px;flex-wrap:nowrap}
+  .topbar:before{display:none}
+  .brand{display:flex;color:var(--ink);font-family:var(--display-font);font-size:17px;letter-spacing:.04em}
+  .brand .logo{width:32px;height:32px;border-radius:5px;box-shadow:4px 4px 0 #DDE6FC}
+  .top-actions{gap:5px;min-width:0}
+  .top-actions .btn{width:40px;min-width:40px;height:40px;padding:0}
+  .card{padding:15px}
+  .today-card{margin-left:-1px;margin-right:-1px}
+  .semester-ruler{grid-template-columns:auto 1fr;padding:10px 13px}
+  .sr-date{display:none}
+  .course-toolbar{gap:7px}
+  .course-toolbar>span[style]{display:none}
+  .course-toolbar .btn{min-height:38px;padding:7px 10px}
+  .money-stats{gap:7px}
+  .modal{align-items:flex-end;padding:8px}
+  .modal-box{max-height:92vh;border-radius:14px 14px 10px 10px;padding:17px}
+}
+@media(max-width:420px){
+  .main{padding-left:10px;padding-right:10px}
+  .brand span{font-size:16px}
+  .top-actions .btn{width:38px;min-width:38px;height:38px}
+  .today-head{font-size:17px}
+  .today-item{align-items:flex-start}
+  .money-stats{grid-template-columns:1fr 1fr}
+  .money-stats .mstat:last-child{grid-column:1/-1}
+  .learn-stats{gap:7px}
+  .bt-item{font-size:9px}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+}
 </style>
 </head>
 <body>
@@ -331,12 +504,12 @@ body.has-bt .toast{bottom:calc(76px + env(safe-area-inset-bottom))}
       <div class="logo" id="logoIcon"></div>
       <span>研途小助手</span>
     </div>
-    <a class="nav-item active" data-panel="course" href="javascript:void(0)" onclick="switchPanel('course')"><span id="navIconCourse"></span>课程表</a>
-    <a class="nav-item" data-panel="papers" href="javascript:void(0)" onclick="switchPanel('papers')"><span id="navIconPapers"></span>文献整理</a>
-    <a class="nav-item" data-panel="plan" href="javascript:void(0)" onclick="switchPanel('plan')"><span id="navIconPlan"></span>本周计划</a>
-    <a class="nav-item" data-panel="money" href="javascript:void(0)" onclick="switchPanel('money')"><span id="navIconMoney"></span>记账本</a>
-    <a class="nav-item" data-panel="learn" href="javascript:void(0)" onclick="switchPanel('learn')"><span id="navIconLearn"></span>语言学习</a>
-    <a class="nav-item" data-panel="settings" href="javascript:void(0)" onclick="switchPanel('settings')"><span id="navIconSet"></span>AI 与备份</a>
+    <a class="nav-item active" data-index="01" data-panel="course" href="javascript:void(0)" onclick="switchPanel('course')"><span id="navIconCourse"></span>课程表</a>
+    <a class="nav-item" data-index="02" data-panel="papers" href="javascript:void(0)" onclick="switchPanel('papers')"><span id="navIconPapers"></span>文献整理</a>
+    <a class="nav-item" data-index="03" data-panel="plan" href="javascript:void(0)" onclick="switchPanel('plan')"><span id="navIconPlan"></span>本周计划</a>
+    <a class="nav-item" data-index="04" data-panel="money" href="javascript:void(0)" onclick="switchPanel('money')"><span id="navIconMoney"></span>记账本</a>
+    <a class="nav-item" data-index="05" data-panel="learn" href="javascript:void(0)" onclick="switchPanel('learn')"><span id="navIconLearn"></span>语言学习</a>
+    <a class="nav-item" data-index="06" data-panel="settings" href="javascript:void(0)" onclick="switchPanel('settings')"><span id="navIconSet"></span>AI 与备份</a>
     <div class="sb-foot">数据保存在本机浏览器<br>定期导出备份更安心</div>
   </aside>
 
@@ -1252,6 +1425,9 @@ function parseCourseText(text){
 /* ================= 今天要处理 ================= */
 function renderToday(){
   var T=todayStr(),html='';
+  var semWeek=currentWeek(),semPct=meta.semStart&&semWeek>0?Math.min(100,Math.round(semWeek/20*100)):0;
+  var semLabel=meta.semStart&&semWeek>0?('SEMESTER · WEEK '+semWeek):'SEMESTER · 待设置开学日期';
+  var ruler='<div class="semester-ruler"><span class="sr-label">'+semLabel+'</span><span class="sr-track"><i style="width:'+semPct+'%"></i></span><span class="sr-date">'+T.slice(5).replace('-',' / ')+'</span></div>';
   var ovTasks=tasks.filter(function(t){return !t.done&&t.date<T});
   var tdTasks=tasks.filter(function(t){return !t.done&&t.date===T});
   var ovPapers=papers.filter(function(p){return p.status!=='done'&&p.planDate&&p.planDate<T});
@@ -1275,9 +1451,9 @@ function renderToday(){
   tdTasks.forEach(function(t){items.push({cls:'',tt:'今天要做：'+t.name,td:'P'+t.priority.slice(1),btn:'标完成',act:'toggleTask(\''+t.id+'\')'})});
   tdPapers.forEach(function(p){items.push({cls:'',tt:'今天该读：'+p.title,td:'计划阅读日',btn:'标已读',act:'markPaperDone(\''+p.id+'\')'})});
   if(items.length===0){
-    html='<div class="today-card"><div class="today-head"><span>'+ico('sun',18)+'</span>今天要处理</div><div class="today-empty">今天没有待处理事项，可以安心推进本周计划啦</div></div>';
+    html='<div class="today-card">'+ruler+'<div class="today-head"><span>'+ico('sun',18)+'</span>今天要处理</div><div class="today-empty">今天没有待处理事项，可以安心推进本周计划啦</div></div>';
   }else{
-    html='<div class="today-card"><div class="today-head"><span>'+ico('clock',18)+'</span>今天要处理 <span style="font-weight:400;font-size:12.5px;opacity:.85">（'+items.length+' 项）</span></div><div class="today-list">';
+    html='<div class="today-card">'+ruler+'<div class="today-head"><span>'+ico('clock',18)+'</span>今天要处理 <span style="font-weight:400;font-size:12.5px;opacity:.85">（'+items.length+' 项）</span></div><div class="today-list">';
     items.forEach(function(it){
       html+='<div class="today-item '+it.cls+'"><div class="tg"><div class="tt">'+esc(it.tt)+'</div><div class="td">'+esc(it.td)+'</div></div><button class="btn btn-sm" style="min-height:36px;background:rgba(255,255,255,.92);color:#3A56D6;border:none;flex-shrink:0" onclick="'+it.act+'">'+it.btn+'</button></div>';
     });
@@ -2071,7 +2247,7 @@ function renderPapers(){
 
 /* ================= AI 助手 ================= */
 function fillSettings(){
-  var el=$('#appVer');if(el)el.textContent='v19';
+  var el=$('#appVer');if(el)el.textContent='v20';
   $('#aiBase').value=aiCfg.baseUrl||'';
   $('#aiKey').value=aiCfg.apiKey||'';
   $('#aiModel').value=aiCfg.model||'';
