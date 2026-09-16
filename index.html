@@ -546,8 +546,8 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
           <span class="week-badge" id="weekBadge">第 1 周</span>
           <label class="sem-start">开学日期 <input class="inp" type="date" id="semStart" onchange="saveSemStart(this.value)" style="width:150px;padding:6px 10px"></label>
           <span class="view-switch" id="viewSwitch">
-            <button class="btn btn-sm active" id="vwAll" onclick="setCourseView('all')">全部课程</button>
-            <button class="btn btn-sm" id="vwWeek" onclick="setCourseView('week')">本周课程</button>
+            <button class="btn btn-sm" id="vwAll" onclick="setCourseView('all')">全部课程</button>
+            <button class="btn btn-sm active" id="vwWeek" onclick="setCourseView('week')">本周课程</button>
           </span>
           <span class="view-switch" aria-label="课表周次翻页">
             <button class="btn btn-sm" id="coursePrevWeek" onclick="changeCourseWeek(-1)">上一周</button>
@@ -828,7 +828,7 @@ function svgEl(id,n,s){var el=document.getElementById(id);if(el)el.innerHTML=ico
 /* ================= 数据 ================= */
 var KEY={papers:'wb_yantu_papers',tasks:'wb_yantu_tasks',money:'wb_yantu_money',course:'wb_yantu_course',ai:'wb_yantu_ai',meta:'wb_yantu_meta'};
 var papers=[],tasks=[],money=[],course=[],aiCfg={baseUrl:'',apiKey:'',model:''},meta={};
-var courseView='all';
+var courseView='week';
 var selectedCourseWeek=0;
 var CCOLORS=['#4A6CF7','#7B5BF0','#1E9E6A','#D97706','#E5484D','#0EA5E9','#8B5CF6','#64748B'];
 var WEEKS_CN=['','周一','周二','周三','周四','周五','周六','周日'];
