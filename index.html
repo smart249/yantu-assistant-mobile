@@ -181,6 +181,7 @@ select.inp{appearance:none;background-image:linear-gradient(45deg,transparent 50
 .view-switch .btn{margin:0}
 .view-switch .btn.active{background:var(--main);border-color:var(--main);color:#fff}
 .course-scroll{overflow:auto;-webkit-overflow-scrolling:touch;border-radius:12px}
+.mobile-course-agenda{display:none}
 .course-grid{min-width:740px;background:var(--card);box-shadow:var(--shadow);overflow:hidden;position:relative}
 .cg-head{display:flex;position:sticky;top:0;z-index:3;background:var(--bg)}
 .cg-head>div{display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:600;color:var(--sub);border:.5px solid var(--line);background:var(--bg)}
@@ -476,6 +477,19 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
   .course-toolbar{gap:7px}
   .course-toolbar>span[style]{display:none}
   .course-toolbar .btn{min-height:38px;padding:7px 10px}
+  .course-toolbar .view-switch{display:flex;flex-wrap:wrap;gap:5px;max-width:100%}
+  .course-toolbar #courseWeekDates{display:block;flex-basis:100%;line-height:1.6}
+  #courseGrid{overflow:visible;border:0;background:transparent;box-shadow:none}
+  #courseGrid .course-grid{display:none}
+  .mobile-course-agenda{display:grid;gap:14px;min-width:0}
+  .mobile-course-day{min-width:0;border:1px solid var(--rule);border-radius:8px;overflow:hidden;background:var(--card)}
+  .mobile-course-day h3{margin:0;padding:10px 12px;background:#EEF2F7;font-size:14px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  .mobile-course-day h3 small{font-family:var(--data-font);font-weight:400;color:var(--mut);font-size:12px}
+  .mobile-course-card{display:block;width:calc(100% - 16px);margin:8px;padding:12px;text-align:left;font:inherit;color:var(--ink);background:#F8FAFF;border:1px solid var(--rule);border-left:4px solid var(--blueprint);border-radius:6px;cursor:pointer;min-width:0;white-space:normal;overflow-wrap:anywhere}
+  .mobile-course-card .mc-name{display:block;font-size:15px;line-height:1.6;font-weight:700;white-space:normal}
+  .mobile-course-card .mc-time{display:block;font-family:var(--data-font);font-size:13px;color:var(--blueprint);line-height:1.8;margin-bottom:5px}
+  .mobile-course-card .mc-detail{display:block;font-size:13px;color:var(--sub);line-height:1.7;margin-top:3px}
+  .mobile-course-empty{padding:12px;margin:0;font-size:13px;color:var(--mut)}
   .money-stats{gap:7px}
   .modal{align-items:flex-end;padding:8px}
   .modal-box{max-height:92vh;border-radius:14px 14px 10px 10px;padding:17px}
@@ -1010,7 +1024,24 @@ function renderCourse(){
     grid+='</div>';
   }
   grid+='</div></div></div>';
-  $('#courseGrid').innerHTML=grid;
+  var agenda='<div class="mobile-course-agenda" aria-label="一周课程列表">';
+  for(d=1;d<=7;d++){
+    var dayCourses=list.filter(function(c){return c.day===d}).sort(function(a,b){return a.start-b.start||a.end-b.end});
+    var dayDate=meta.semStart&&courseView==='week'?icsAddDays(meta.semStart,(wk-1)*7+d-1):'';
+    agenda+='<section class="mobile-course-day"><h3>'+WEEKS_CN[d]+'<small>'+dayDate+(dayDate===T?' · 今天':'')+'</small></h3>';
+    if(!dayCourses.length)agenda+='<p class="mobile-course-empty">当天无课</p>';
+    dayCourses.forEach(function(c){
+      var startTime=sc.starts[c.start-1],endStart=sc.starts[c.end-1];
+      var timeLabel=startTime&&endStart?startTime+'–'+icsEndTime(endStart,sc.lengths):'请设置对应节次的作息';
+      agenda+='<button type="button" class="mobile-course-card" data-course-id="'+esc(c.id)+'" onclick="openCourseForm(this.dataset.courseId)">'+
+        '<span class="mc-time">'+esc(timeLabel)+' · 第 '+c.start+'–'+c.end+' 节</span><span class="mc-name">'+esc(c.name)+'</span>'+
+        '<span class="mc-detail">教室：'+esc(c.location||'待定')+'</span><span class="mc-detail">教师：'+esc(c.teacher||'待定')+'</span>'+
+        '<span class="mc-detail">周次：'+esc(c.weeks||'全周')+'</span></button>';
+    });
+    agenda+='</section>';
+  }
+  agenda+='</div>';
+  $('#courseGrid').innerHTML=grid+agenda;
   var legend='';
   if(!meta.semStart)legend='<span class="lg" style="color:var(--orange)">设置开学日期后，可切换「本周课程」并自动计算当前周次</span>';
   if(courseView==='week')legend+='<span class="lg">'+(wk===currentWeek()?'本周':'正在查看')+'（第 '+wk+' 周）'+(list.length?'共 '+list.length+' 条排课':'暂无课程')+'</span>';
