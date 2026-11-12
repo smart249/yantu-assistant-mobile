@@ -1,18 +1,18 @@
 {
-  "name": "研途小助手 · 读研工作台",
-  "short_name": "研途小助手",
-  "description": "文献整理 · 课程表 · 本周计划 · 记账，你的读研数字助手",
   "id": "./",
-  "start_url": "./index.html",
+  "name": "读研小助手",
+  "short_name": "读研小助手",
+  "description": "课表、个人计划和今日训练，打开就能看到。",
+  "lang": "zh-CN",
+  "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "orientation": "portrait",
-  "background_color": "#F5F6FA",
-  "theme_color": "#4A6CF7",
-  "lang": "zh-CN",
+  "orientation": "portrait-primary",
+  "background_color": "#f5f8fb",
+  "theme_color": "#245edb",
   "icons": [
-    { "src": "./icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "./icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "./icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
   ]
 }
